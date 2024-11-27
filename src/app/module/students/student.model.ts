@@ -4,13 +4,13 @@ import { Schema, model } from 'mongoose';
 import {
   StudentMethods,
   StudentModel,
+  StudentModels,
   TGuardian,
   TLocalGuardian,
   TStudent,
   TUserName,
 } from './student.interface';
 import config from '../../config';
-
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -155,55 +155,49 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
 );
 
 // virtual
-// studentSchema.virtual('fullName').get(function () {
-//   return this.name.firstName + this.name.middleName + this.name.lastName;
-// });
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+  // return this.name.firstName + this.name.middleName + this.name.lastName;
+});
 
 // pre save middleware/ hook : will work on create()  save()
-// studentSchema.pre('save', async function (next) {
-// console.log(this, 'pre hook : we will save  data');
-// eslint-disable-next-line @typescript-eslint/no-this-alias
-// const user = this; // doc
-// hashing password and save into DB
-//   user.password = await bcrypt.hash(
-//     user.password,
-//     Number(config.bcrypt_salt_rounds),
-//   );
-//   next();
-// });
-
-// pre hook
-studentSchema.pre('save',async function (next) {
-  // console.log(this, 'pre hook : we will save data');
-  // hashing pass and save into db
+studentSchema.pre('save', async function (next) {
+  console.log(this, 'pre hook : we will save  data');
   // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user=this
-  user.password=await bcrypt.hash(user.password, Number(config.bcrypt_salt_round))
-  next()
+  const user = this; // doc
+  // hashing password and save into DB
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_round),
+  );
+  next();
 });
 
 // post save middleware / hook
-studentSchema.post('save', function () {
-  // doc.password = '';
-  // next();
+studentSchema.post('save', function (doc, next) {
+  doc.password = '';
+
   console.log(this, 'post hook : we save our data');
+  next();
 });
 
 // Query Middleware
 studentSchema.pre('find', function (next) {
-  this.find({ isDeleted: { $ne: true } });
+  // this.find({ isDeleted: { $ne: true } });
+  // this.find({ isDeleted: { $ne: false } });
   next();
 });
 
 studentSchema.pre('findOne', function (next) {
-  this.find({ isDeleted: { $ne: true } });
+  // this.find({ isDeleted: { $ne: true } });
   next();
 });
 
 // [ {$match: { isDeleted : {  $ne: : true}}}   ,{ '$match': { id: '123456' } } ]
 
 studentSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  console.log(this.pipeline());
+  // this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
 
@@ -220,7 +214,7 @@ studentSchema.statics.isUserExists = async function (id: string) {
 //   return existingUser;
 // };
 
-export const StudentModelSchema = model<TStudent, StudentModels>(
+export const StudentModelSchema = model<TStudent, StudentModel>(
   'Student',
   studentSchema,
 );

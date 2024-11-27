@@ -20,15 +20,24 @@ const createStudentIntoDB = async (Students: TStudent) => {
 
 const getAllStudentsFormDB = async () => {
   const result = await StudentModelSchema.find();
+  console.log(result,"service")
   return result;
 };
 const getAStudentFormDB = async (id: string) => {
-  const result = await StudentModelSchema.findOne({ id: id });
+  // const result = await StudentModelSchema.findOne({ id: id });
+  // alternative
+  const result = await StudentModelSchema.aggregate([{$match:{id:id}}]);
   return result;
 };
+// delete a doc
+const deleteStudentFromDB=async(id:string)=>{
+  const result=await StudentModelSchema.updateOne({id}, {isDeleted:true})
+  return result;
+  }
 
 export const StudentServices = {
   createStudentIntoDB,
   getAllStudentsFormDB,
   getAStudentFormDB,
+  deleteStudentFromDB
 };
