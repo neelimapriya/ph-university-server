@@ -1,4 +1,4 @@
-// import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 // import config from '../../config';
 import {
@@ -9,6 +9,8 @@ import {
   TStudent,
   TUserName,
 } from './student.interface';
+import config from '../../config';
+
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -77,14 +79,14 @@ const localGuradianSchema = new Schema<TLocalGuardian>({
   },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel,StudentMethods>(
+const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
   {
     id: { type: String, required: [true, 'ID is required'], unique: true },
-    // password: {
-    //   type: String,
-    //   required: [true, 'Password is required'],
-    //   maxlength: [20, 'Password can not be more than 20 characters'],
-    // },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      maxlength: [20, 'Password can not be more than 20 characters'],
+    },
     name: {
       type: userNameSchema,
       required: [true, 'Name is required'],
@@ -159,10 +161,10 @@ const studentSchema = new Schema<TStudent, StudentModel,StudentMethods>(
 
 // pre save middleware/ hook : will work on create()  save()
 // studentSchema.pre('save', async function (next) {
-  // console.log(this, 'pre hook : we will save  data');
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  // const user = this; // doc
-  // hashing password and save into DB
+// console.log(this, 'pre hook : we will save  data');
+// eslint-disable-next-line @typescript-eslint/no-this-alias
+// const user = this; // doc
+// hashing password and save into DB
 //   user.password = await bcrypt.hash(
 //     user.password,
 //     Number(config.bcrypt_salt_rounds),
@@ -170,11 +172,22 @@ const studentSchema = new Schema<TStudent, StudentModel,StudentMethods>(
 //   next();
 // });
 
+// pre hook
+studentSchema.pre('save',async function (next) {
+  // console.log(this, 'pre hook : we will save data');
+  // hashing pass and save into db
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user=this
+  user.password=await bcrypt.hash(user.password, Number(config.bcrypt_salt_round))
+  next()
+});
+
 // post save middleware / hook
-// studentSchema.post('save', function (doc, next) {
-//   doc.password = '';
-//   next();
-// });
+studentSchema.post('save', function () {
+  // doc.password = '';
+  // next();
+  console.log(this, 'post hook : we save our data');
+});
 
 // Query Middleware
 studentSchema.pre('find', function (next) {
@@ -207,4 +220,7 @@ studentSchema.statics.isUserExists = async function (id: string) {
 //   return existingUser;
 // };
 
-export const StudentModelSchema = model<TStudent, StudentModels>('Student', studentSchema);
+export const StudentModelSchema = model<TStudent, StudentModels>(
+  'Student',
+  studentSchema,
+);
