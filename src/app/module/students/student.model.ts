@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import { Schema, model } from 'mongoose';
 // import config from '../../config';
 import {
@@ -82,11 +81,13 @@ const localGuradianSchema = new Schema<TLocalGuardian>({
 const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
   {
     id: { type: String, required: [true, 'ID is required'], unique: true },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      maxlength: [20, 'Password can not be more than 20 characters'],
+    user:{
+      type:Schema.Types.ObjectId,
+      required:[true, 'user id required'],
+      unique:true,
+      ref:'User'
     },
+  
     name: {
       type: userNameSchema,
       required: [true, 'Name is required'],
@@ -134,14 +135,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
       required: [true, 'Local guardian information is required'],
     },
     profileImg: { type: String },
-    isActive: {
-      type: String,
-      enum: {
-        values: ['active', 'blocked'],
-        message: '{VALUE} is not a valid status',
-      },
-      default: 'active',
-    },
+    
     isDeleted: {
       type: Boolean,
       default: false,
@@ -160,26 +154,7 @@ studentSchema.virtual('fullName').get(function () {
   // return this.name.firstName + this.name.middleName + this.name.lastName;
 });
 
-// pre save middleware/ hook : will work on create()  save()
-studentSchema.pre('save', async function (next) {
-  console.log(this, 'pre hook : we will save  data');
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this; // doc
-  // hashing password and save into DB
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_round),
-  );
-  next();
-});
 
-// post save middleware / hook
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-
-  console.log(this, 'post hook : we save our data');
-  next();
-});
 
 // Query Middleware
 studentSchema.pre('find', function (next) {
@@ -193,7 +168,7 @@ studentSchema.pre('findOne', function (next) {
   next();
 });
 
-// [ {$match: { isDeleted : {  $ne: : true}}}   ,{ '$match': { id: '123456' } } ]
+
 
 studentSchema.pre('aggregate', function (next) {
   console.log(this.pipeline());
