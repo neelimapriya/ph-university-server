@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable prefer-const */
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { StudentRoutes } from './app/module/students/student.route';
-import { userRoutes } from './app/module/user/user.route';
 import { globalErrorHandler } from './app/middleware/globalErrorHandler';
 import { notFound } from './app/middleware/notFound';
+import router from './app/routes';
 
 const app: Application = express();
 
@@ -17,8 +14,7 @@ app.use(cors());
 // /api/v1/students/create-student
 
 // application routes
-app.use('/api/v1/students', StudentRoutes);
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1', router);
 
 const getAController = (req: Request, res: Response) => {
   // const a = 19;
@@ -32,6 +28,6 @@ app.get('/', getAController);
 app.use(globalErrorHandler);
 
 // not found
-app.use(notFound)
+app.use(notFound);
 
 export default app;

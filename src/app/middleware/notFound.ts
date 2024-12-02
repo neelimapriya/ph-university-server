@@ -1,33 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from 'express';
 import {
-	ReasonPhrases,
-	StatusCodes,
-	getReasonPhrase,
-	getStatusCode,
+  ReasonPhrases,
+  StatusCodes,
+  getReasonPhrase,
+  getStatusCode,
 } from 'http-status-codes';
 
-export const notFound = (
-  req: Request,
-  res: Response,
-  next:NextFunction
-) => {
-
-  res.status(StatusCodes.OK).json({
-    success: false,
-    message:'API not found',
-    error: '',
-  })
-  .send(ReasonPhrases.OK);
+export const notFound = (req: Request, res: Response, next: NextFunction) => {
   res
-	.status(StatusCodes.INTERNAL_SERVER_ERROR)
-	.send({
-		error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR)
-	});
+    .status(StatusCodes.NOT_FOUND)
+    .json({
+      success: false,
+      message: 'API not found',
+      error: '',
+    })
+    .send(ReasonPhrases.OK);
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
+    error: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR),
+  });
 
-res
-	.status(getStatusCode('Internal Server Error'))
-	.send({
-		error: 'Internal Server Error'
-	});
+  res.status(getStatusCode('Internal Server Error')).send({
+    error: 'Internal Server Error',
+  });
 };

@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { StudentServices } from './student.service';
+import { sendResponse } from '../../utils/sendResponse';
+import { StatusCodes } from 'http-status-codes';
 // import studentValidationSchema from './student.validationJoi';
 // import studentValidationSchema from './student.validationZod';
 
@@ -47,11 +49,14 @@ const getAllStudents = async (req: Request, res: Response, next:NextFunction) =>
   try {
     const result = await StudentServices.getAllStudentsFormDB();
     console.log(result,"controller")
-    res.status(200).json({
-      success: true,
-      message: 'Students are retrieved  successfully',
-      data: result,
-    });
+  
+      sendResponse(res, {
+        success: true,
+        message: 'Students are retrieved  successfully',
+        data: result,
+        statusCode: StatusCodes.OK,
+      });
+   
   } catch (err) {
    next(err)
   }
@@ -61,10 +66,11 @@ const getAStudent = async (req: Request, res: Response,next:NextFunction) => {
   try {
     const { studentId } = req.params;
     const result = await StudentServices.getAStudentFormDB(studentId);
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
-      message: 'Student is retrieved  successfully',
+      message:'Student is retrieved  successfully',
       data: result,
+      statusCode: StatusCodes.OK,
     });
   } catch (err) {
    next(err)
@@ -77,11 +83,13 @@ const deleteAStudent = async (req: Request, res: Response,next:NextFunction) => 
     const { studentId } = req.params;
     const result=await StudentServices.deleteStudentFromDB(studentId)
     
-    res.status(200).json({
+    sendResponse(res, {
       success: true,
-      message: 'Student deleted  successfully',
+      message:'Student deleted successfully',
       data: result,
+      statusCode: StatusCodes.OK,
     });
+    
 
   } catch (err) {
     next(err)
