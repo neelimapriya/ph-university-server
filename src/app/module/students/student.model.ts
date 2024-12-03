@@ -81,13 +81,13 @@ const localGuradianSchema = new Schema<TLocalGuardian>({
 const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
   {
     id: { type: String, required: [true, 'ID is required'], unique: true },
-    user:{
-      type:Schema.Types.ObjectId,
-      required:[true, 'user id required'],
-      unique:true,
-      ref:'User'
+    user: {
+      type: Schema.Types.ObjectId,
+      required: [true, 'user id required'],
+      unique: true,
+      ref: 'User',
     },
-  
+
     name: {
       type: userNameSchema,
       required: [true, 'Name is required'],
@@ -100,7 +100,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
       },
       required: [true, 'Gender is required'],
     },
-    dateOfBirth: { type: String },
+    dateOfBirth: { type: Date },
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -135,7 +135,11 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
       required: [true, 'Local guardian information is required'],
     },
     profileImg: { type: String },
-    
+    admissionSemester: {
+      type: Schema.Types.ObjectId,
+      ref:'AcademicSemester',
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -154,8 +158,6 @@ studentSchema.virtual('fullName').get(function () {
   // return this.name.firstName + this.name.middleName + this.name.lastName;
 });
 
-
-
 // Query Middleware
 studentSchema.pre('find', function (next) {
   // this.find({ isDeleted: { $ne: true } });
@@ -167,8 +169,6 @@ studentSchema.pre('findOne', function (next) {
   // this.find({ isDeleted: { $ne: true } });
   next();
 });
-
-
 
 studentSchema.pre('aggregate', function (next) {
   console.log(this.pipeline());
