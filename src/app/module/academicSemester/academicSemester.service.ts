@@ -19,7 +19,7 @@ const getAllSemesterFromDB = async () => {
 const getSingleSemesterFromDB=async(id:string)=>{
   const result = await academicSemester.findById(id);
   // const result= await academicSemester.aggregate([{$match:{id:id}}])
-  console.log(result);
+  // console.log(result);
   return result
 }
 

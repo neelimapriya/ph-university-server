@@ -1,6 +1,11 @@
 // import { TStudent } from './student.interface';
 // import { StudentModel } from "./student.interface";
+import mongoose from 'mongoose';
 import { StudentModelSchema } from './student.model';
+import AppError from '../../errors/AppErrors';
+import { StatusCodes } from 'http-status-codes';
+import { userModel } from '../user/user.model';
+import { TStudent } from './student.interface';
 
 // const createStudentIntoDB = async (Students: TStudent) => {
 //   if (await StudentModelSchema.isUserExists(Students.id)) {
@@ -31,7 +36,7 @@ const getAllStudentsFormDB = async () => {
   return result;
 };
 const getAStudentFormDB = async (id: string) => {
-  const result = await StudentModelSchema.findOne({id})
+  const result = await StudentModelSchema.findOne({ id })
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -45,9 +50,64 @@ const getAStudentFormDB = async (id: string) => {
 };
 // delete a doc
 const deleteStudentFromDB = async (id: string) => {
-  const result = await StudentModelSchema.updateOne(
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    const deledStudent = await StudentModelSchema.findOneAndUpdate(
+      { id },
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!deledStudent) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete student');
+    }
+    const deleteUser = await userModel.findOneAndUpdate(
+      { id },
+      { isDeleted: true },
+      { new: true, session },
+    );
+    if (!deleteUser) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete user');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+    return deledStudent;
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete student');
+  }
+};
+
+const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+
+  const modifiedUpdatedData: Record<string, unknown> = {
+    ...remainingStudentData,
+  };
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      modifiedUpdatedData[`name.${key}`] = value;
+    }
+  }
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      modifiedUpdatedData[`guardian.${key}`] = value;
+    }
+  }
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      modifiedUpdatedData[`localGuardian.${key}`] = value;
+    }
+  }
+  // console.log(modifiedUpdatedData);
+  const result = await StudentModelSchema.findOneAndUpdate(
     { id },
-    { isDeleted: true },
+    modifiedUpdatedData,
+    {
+      new: true,
+      runValidators: true,
+    },
   );
   return result;
 };
@@ -56,4 +116,5 @@ export const StudentServices = {
   getAllStudentsFormDB,
   getAStudentFormDB,
   deleteStudentFromDB,
+  updateStudentIntoDB,
 };

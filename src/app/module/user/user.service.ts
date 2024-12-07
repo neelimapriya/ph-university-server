@@ -23,34 +23,30 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     payload.admissionSemester,
   );
 
-  const session=await mongoose.startSession()
+  const session = await mongoose.startSession();
   try {
-    session.startTransaction()
-    // console.log(admissionSemester,"userservice")
+    session.startTransaction();
     // set generated id
     userData.id = await generatedStudentId(admissionSemester);
     // create a user (transaction-1)
-    const newUser = await userModel.create([userData],{session}); //built in static method
-
+    const newUser = await userModel.create([userData], { session }); //built in static method
     //   create a student
     if (!newUser.length) {
-    throw new AppError(StatusCodes.BAD_REQUEST,'Failed to create user')
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create user');}
+    // set id, _id as user
+    payload.id = newUser[0].id; //embedding id
+    payload.user = newUser[0]._id; //reference _id
+    const newStudent = await StudentModelSchema.create([payload], { session });
+    if (!newStudent.length) {
+      throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to create student');
     }
-      // set id, _id as user
-      payload.id = newUser[0].id; //embedding id
-      payload.user = newUser[0]._id; //reference _id
-
-      const newStudent = await StudentModelSchema.create([payload],{session});
-      if(!newStudent.length){
-        throw new AppError(StatusCodes.BAD_REQUEST,"Failed to create student")
-      }
-      await session.commitTransaction()
-      await session.endSession()
-      return newStudent;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    await session.commitTransaction();
+    await session.endSession();
+    return newStudent;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    await session.abortTransaction()
-    await session.endSession()
+    await session.abortTransaction();
+    await session.endSession();
   }
 };
 
