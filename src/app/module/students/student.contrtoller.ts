@@ -9,8 +9,8 @@ import { StudentModelSchema } from './student.model';
 
 
 // all student data
-const getAllStudents = catchAsync(async (req, res) => {
-  const result = await StudentServices.getAllStudentsFormDB();
+const getAllStudents:RequestHandler = catchAsync(async (req, res) => {
+  const result = await StudentServices.getAllStudentsFormDB(req.query);
   sendResponse(res, {
     success: true,
     message: 'Students are retrieved  successfully',
@@ -21,8 +21,8 @@ const getAllStudents = catchAsync(async (req, res) => {
 
 // single student data
 const getAStudent = catchAsync(async (req, res, next) => {
-  const { studentId } = req.params;
-  const result = await StudentServices.getAStudentFormDB(studentId);
+  const { id } = req.params;
+  const result = await StudentServices.getAStudentFormDB(id);
   sendResponse(res, {
     success: true,
     message: 'Student is retrieved  successfully',
@@ -33,8 +33,8 @@ const getAStudent = catchAsync(async (req, res, next) => {
 
 // delete a student
 const deleteAStudent = catchAsync(async (req, res, next) => {
-  const { studentId } = req.params;
-  const result = await StudentServices.deleteStudentFromDB(studentId);
+  const { id } = req.params;
+  const result = await StudentServices.deleteStudentFromDB(id);
 
   sendResponse(res, {
     success: true,
@@ -45,9 +45,9 @@ const deleteAStudent = catchAsync(async (req, res, next) => {
 });
 // update student
 const updateStudent = catchAsync(async (req, res, next) => {
-  const { studentId } = req.params;
+  const { id } = req.params;
   const {student}=req.body
-  const result = await StudentServices.updateStudentIntoDB(studentId,student);
+  const result = await StudentServices.updateStudentIntoDB(id,student);
 
   sendResponse(res, {
     success: true,

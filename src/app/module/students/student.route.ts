@@ -6,9 +6,9 @@ const router = express.Router();
 // will cal controller function
 
 router.get('/', studentController.getAllStudents)
-router.get('/:studentId', studentController.getAStudent)
-router.patch('/:studentId', studentController.updateStudent)
-router.delete('/:studentId', studentController.deleteAStudent)
+router.get('/:id', studentController.getAStudent)
+router.patch('/:id', studentController.updateStudent)
+router.delete('/:id', studentController.deleteAStudent)
 
 export const StudentRoutes = router;
 

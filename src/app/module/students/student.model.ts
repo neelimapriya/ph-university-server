@@ -165,19 +165,19 @@ studentSchema.virtual('fullName').get(function () {
 
 // Query Middleware
 studentSchema.pre('find', function (next) {
-  // this.find({ isDeleted: { $ne: true } });
+  this.find({ isDeleted: { $ne: true } });
   // this.find({ isDeleted: { $ne: false } });
   next();
 });
 
 studentSchema.pre('findOne', function (next) {
-  // this.find({ isDeleted: { $ne: true } });
+  this.find({ isDeleted: { $ne: true } });
   next();
 });
 
 studentSchema.pre('aggregate', function (next) {
   // console.log(this.pipeline());
-  // this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
   next();
 });
 
