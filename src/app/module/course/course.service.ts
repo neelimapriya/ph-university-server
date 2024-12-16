@@ -3,8 +3,8 @@
 import mongoose from 'mongoose';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { courseSearchableFIeld } from './course.constant';
-import { TCourse } from './course.interface';
-import { Course } from './course.model';
+import { TCourse, TCourseFaculty } from './course.interface';
+import { Course, CourseFaculty } from './course.model';
 import AppError from '../../errors/AppErrors';
 import { StatusCodes } from 'http-status-codes';
 
@@ -39,8 +39,10 @@ const deleteCourseFromDB = async (id: string) => {
   );
   return result;
 };
+
 const updateCourseFromDB = async (id: string, payload: Partial<TCourse>) => {
   const { preRequisiteCourses, ...courseRemainingData } = payload;
+  // console.log(payload, preRequisiteCourses, courseRemainingData);
   const session = await mongoose.startSession();
 
   try {
@@ -62,8 +64,10 @@ const updateCourseFromDB = async (id: string, payload: Partial<TCourse>) => {
     if (preRequisiteCourses && preRequisiteCourses.length > 0) {
       // filter out the deleted field
       const deletedPreRequisites = preRequisiteCourses
-        .filter((el: { course: any; isDeleted: any; }) => el.course && el.isDeleted)
-        .map((el: { course: any; }) => el.course);
+        .filter(
+          (el: { course: any; isDeleted: any }) => el.course && el.isDeleted,
+        )
+        .map((el: { course: any }) => el.course);
 
       const deletedPreRequisitesCourses = await Course.findByIdAndUpdate(
         id,
@@ -87,7 +91,7 @@ const updateCourseFromDB = async (id: string, payload: Partial<TCourse>) => {
 
       // filter out the new course fields
       const newPreRequisites = preRequisiteCourses?.filter(
-        (el: { course: any; isDeleted: any; }) => el.course && !el.isDeleted,
+        (el: { course: any; isDeleted: any }) => el.course && !el.isDeleted,
       );
 
       const newPreRequisitesCourse = await Course.findByIdAndUpdate(
@@ -118,10 +122,46 @@ const updateCourseFromDB = async (id: string, payload: Partial<TCourse>) => {
   }
 };
 
+const assignFacultiesWithCourseIntoDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+      course: id,
+      $addToSet: { faculties: { $each: payload } },
+    },
+    {
+      upsert: true,
+      new: true,
+    },
+  );
+  return result;
+};
+
+const removeFacultiesFromCourseFromDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+      $pull: { faculties: { $in: payload } },
+    },
+    {
+      new: true,
+    },
+  );
+  return result;
+};
+
 export const CourseService = {
   createCourseIntoDB,
   getSingleCourseFromDB,
   getAllCourseFromDB,
   deleteCourseFromDB,
   updateCourseFromDB,
+  assignFacultiesWithCourseIntoDB,
+  removeFacultiesFromCourseFromDB
 };
