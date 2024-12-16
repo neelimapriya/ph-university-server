@@ -50,7 +50,6 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     throw new Error(error)
   }
 };
-
 export const UserServices = {
   createStudentIntoDB,
 };
