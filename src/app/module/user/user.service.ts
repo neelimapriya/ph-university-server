@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import config from '../../config';
-import { academicSemester } from '../academicSemester/academicSemester';
+import { academicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../students/student.interface';
 import { StudentModelSchema } from '../students/student.model';
 import { TUser } from './user.interface';

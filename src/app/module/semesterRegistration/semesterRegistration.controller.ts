@@ -6,7 +6,7 @@ import { SemesterRegistrationService } from "./semesterRegistration.service";
 
 const createSemesterRegistration = catchAsync(async (req, res) => {
   
-    const result = await SemesterRegistrationService.createSemesterRegistrationIntoDb();
+    const result = await SemesterRegistrationService.createSemesterRegistrationIntoDb(req.body);
   
     sendResponse(res, {
       statusCode: StatusCodes.OK,
@@ -17,7 +17,7 @@ const createSemesterRegistration = catchAsync(async (req, res) => {
   });
 const getAllSemesterRegistration = catchAsync(async (req, res) => {
   
-    const result = await SemesterRegistrationService.getAllSemesterRegistrationFromDb();
+    const result = await SemesterRegistrationService.getAllSemesterRegistrationFromDb(req.query);
   
     sendResponse(res, {
       statusCode: StatusCodes.OK,
@@ -28,7 +28,8 @@ const getAllSemesterRegistration = catchAsync(async (req, res) => {
   });
 const getSingleSemesterRegistration = catchAsync(async (req, res) => {
   
-    const result = await SemesterRegistrationService.getSingleSemesterRegistrationFromDb();
+    const {id}=req.params
+    const result = await SemesterRegistrationService.getSingleSemesterRegistrationFromDb(id);
   
     sendResponse(res, {
       statusCode: StatusCodes.OK,
@@ -38,8 +39,8 @@ const getSingleSemesterRegistration = catchAsync(async (req, res) => {
     });
   });
 const updateSemesterRegistration = catchAsync(async (req, res) => {
-  
-    const result = await SemesterRegistrationService.updateSemesterRegistrationFromDb();
+  const {id}=req.params
+    const result = await SemesterRegistrationService.updateSemesterRegistrationFromDb(id,req.body);
   
     sendResponse(res, {
       statusCode: StatusCodes.OK,
