@@ -13,6 +13,11 @@ router.post(
     offeredCourseController.createOfferedCourse,
   );
 
+  router.patch(
+    '/:id',
+    validateRequest(OfferedCourseValidations.updateOfferedCourseValidationSchema),
+    offeredCourseController.updateOfferedCourse,
+  );
 
 
 export const offeredCourseRoutes = router;

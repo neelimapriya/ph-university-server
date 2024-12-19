@@ -25,8 +25,20 @@ const getOfferedCourse=catchAsync(async(req:Request, res:Response)=>{
         data:result
     })
 })
+const updateOfferedCourse=catchAsync(async(req:Request, res:Response)=>{
+    const { id } = req.params;
+    const result=await offeredCourseService.updateOfferedCourseIntoDB(id,req.body)
+
+    sendResponse(res,{
+        statusCode:StatusCodes.OK,
+        success:true,
+        message:"Offered course is created successfully",
+        data:result
+    })
+})
 
 export const offeredCourseController={
     createOfferedCourse,
-    getOfferedCourse
+    getOfferedCourse,
+    updateOfferedCourse
 }
