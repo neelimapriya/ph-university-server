@@ -19,7 +19,7 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
       .sort()
       .pagination()
       .fields();
-  
+  // console.log(facultyQuery, 'facultyservice');
     const result = await facultyQuery.modelQuery;
     return result;
   };

@@ -7,7 +7,8 @@ export type TUser={
     needsPasswordChange:boolean;
     role:'admin'|'student'|'faculty';
     status:'in-progress'|'blocked'
-    isDeleted:boolean
+    isDeleted:boolean,
+    passwordChangedAt?:Date
 }
 
 export interface UserModel extends Model<TUser>{

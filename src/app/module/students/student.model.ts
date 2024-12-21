@@ -85,7 +85,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
       type: Schema.Types.ObjectId,
       required: [true, 'user id required'],
       unique: true,
-      ref: 'User',
+      ref: 'Users',
     },
 
     name: {
@@ -137,7 +137,7 @@ const studentSchema = new Schema<TStudent, StudentModel, StudentMethods>(
     profileImg: { type: String },
     admissionSemester: {
       type: Schema.Types.ObjectId,
-      ref:'admissionSemester',
+      ref:'AcademicSemester',
       required: true,
     },
    

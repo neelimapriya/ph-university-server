@@ -17,6 +17,7 @@ import { AcademicDepartmentModel } from '../academicDepartment/academicDepartmen
 import { Faculty } from '../Faculty/faculty.model';
 import { TAdmin } from '../Admin/admin.interface';
 import { Admin } from '../Admin/admin.model';
+import { AcademicSemester } from '../academicSemester/academicSemester.model';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   const userData: Partial<TUser> = {};
@@ -28,7 +29,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   userData.role = 'student';
 
   // find semester info
-  const admissionSemester = await academicSemester.findById(
+  const admissionSemester = await AcademicSemester.findById(
     payload.admissionSemester,
   );
 
