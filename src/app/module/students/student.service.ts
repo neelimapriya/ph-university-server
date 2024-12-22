@@ -51,6 +51,7 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
 };
 const getAStudentFormDB = async (id: string) => {
   const result = await StudentModelSchema.findOne({ id })
+  
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
