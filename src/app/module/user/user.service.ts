@@ -27,6 +27,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // set student role
   userData.role = 'student';
+  userData.email = payload.email;
 
   // find semester info
   const admissionSemester = await AcademicSemester.findById(
@@ -37,7 +38,11 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   try {
     session.startTransaction();
     // set generated id
-    userData.id = await generatedStudentId(admissionSemester);
+    if (admissionSemester) {
+      userData.id = await generatedStudentId(admissionSemester);
+    } else {
+      console.error('admission Semester is null');
+    }
     // create a user (transaction-1)
     const newUser = await userModel.create([userData], { session }); //built in static method
     //   create a student
@@ -66,11 +71,12 @@ const createFacultyIntoDB = async (password: string, payload: TFaculty) => {
   // create a user object
   const userData: Partial<TUser> = {};
 
-  //if password is not given , use deafult password
+  //if password is not given , use default password
   userData.password = password || (config.default_pass as string);
 
   //set student role
   userData.role = 'faculty';
+  userData.email = payload.email;
 
   // find academic department info
   const academicDepartment = await AcademicDepartmentModel.findById(
@@ -125,8 +131,10 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   //if password is not given , use default password
   userData.password = password || (config.default_pass as string);
 
-  //set student role
+  //set admin role
   userData.role = 'admin';
+  // set admin mail
+  userData.email = payload.email;
 
   const session = await mongoose.startSession();
 

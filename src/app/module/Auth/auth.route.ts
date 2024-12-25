@@ -10,6 +10,6 @@ const router=express.Router()
 
 router.post('/login',validateRequest(AuthValidation.loginValidationSchema),AuthControllers.loginUser)
 router.post('/change-password',auth(User_Role.admin, User_Role.faculty,User_Role.student),validateRequest(AuthValidation.changePasswordValidationSchema),AuthControllers.changePassword)
-router.post('/refresh-token',validateRequest(AuthValidation.refreshTokenValidationSchema),AuthControllers.refreshToken)
+router.post('/forget-password',validateRequest(AuthValidation.forgetPasswordValidation),AuthControllers.forgetPassword)
 
 export const AuthRoutes=router

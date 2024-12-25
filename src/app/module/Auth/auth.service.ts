@@ -6,6 +6,7 @@ import config from '../../config';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utitls';
+import { sendEmail } from '../../utils/seendEmail';
 
 const loginUser = async (payload: TLoginUser) => {
   // checking if the user is exist
@@ -147,8 +148,8 @@ const refreshToken = async (token: string) => {
     throw new AppError(StatusCodes.UNAUTHORIZED, 'You are not authorized !');
   }
 
-   //create token and sent to the  client
-   const jwtPayload = {
+  //create token and sent to the  client
+  const jwtPayload = {
     userId: user.id,
     role: user.role,
   };
@@ -157,12 +158,50 @@ const refreshToken = async (token: string) => {
     config.jwt_access_secret as string,
     config.jwt_access_expiresIn as string,
   );
-  return{
-    accessToken
+  return {
+    accessToken,
+  };
+};
+
+const forgetPassword = async (userId: string) => {
+  const user = await userModel.isUserExistByCustomId(userId);
+  // console.log(user);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found!');
   }
+
+  // check if the user is already deleted
+  const isDeleted = user?.isDeleted;
+  if (isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'This user is already deleted!');
+  }
+  // checking if the user is blocked
+
+  const userStatus = user?.status;
+
+  if (userStatus === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
+  }
+
+
+  //create token and sent to the  client
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+  const resetToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '10m'
+  );
+
+  const resetLink=`${config.reset_password_ui_link}?id=${user.id}&token=${resetToken}`
+  sendEmail(user.email,resetLink)
+console.log(resetLink);
 };
 export const AuthService = {
   loginUser,
   changePasswordFromBd,
   refreshToken,
+  forgetPassword,
 };

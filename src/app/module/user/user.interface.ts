@@ -1,19 +1,20 @@
-import { Model } from "mongoose";
-import { User_Role } from "./user.constant";
+import { Model } from 'mongoose';
+import { User_Role } from './user.constant';
 
-export type TUser={
-    id:string;
-    password:string;
-    needsPasswordChange:boolean;
-    role:'admin'|'student'|'faculty';
-    status:'in-progress'|'blocked'
-    isDeleted:boolean,
-    passwordChangedAt?:Date
-}
+export type TUser = {
+  id: string;
+  email: string;
+  password: string;
+  needsPasswordChange: boolean;
+  role: 'admin' | 'student' | 'faculty';
+  status: 'in-progress' | 'blocked';
+  isDeleted: boolean;
+  passwordChangedAt?: Date;
+};
 
-export interface UserModel extends Model<TUser>{
-    isUserExistByCustomId(id:string):Promise<TUser>
-     //instance methods for checking if passwords are matched
+export interface UserModel extends Model<TUser> {
+  isUserExistByCustomId(id: string): Promise<TUser>;
+  //instance methods for checking if passwords are matched
   isPasswordMatched(
     plainTextPassword: string,
     hashedPassword: string,
