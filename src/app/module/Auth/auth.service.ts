@@ -199,9 +199,62 @@ const forgetPassword = async (userId: string) => {
   sendEmail(user.email,resetLink)
 console.log(resetLink);
 };
+const resetPassword=async(payload:{id:string,newPassword:string},token)=>{
+
+  const user = await userModel.isUserExistByCustomId(payload?.id);
+  // console.log(user);
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found!');
+  }
+
+  // check if the user is already deleted
+  const isDeleted = user?.isDeleted;
+  if (isDeleted) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'This user is already deleted!');
+  }
+  // checking if the user is blocked
+
+  const userStatus = user?.status;
+
+  if (userStatus === 'blocked') {
+    throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
+  }
+
+  const decoded=jwt.verify(token,
+    config.jwt_access_secret as string,
+  )as JwtPayload
+
+  if(payload?.id !==decoded.userId){
+throw new AppError(StatusCodes.FORBIDDEN,'You are forbidden!')
+  }
+
+  // hash new pass
+  const newHashedPass = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_salt_round),
+  );
+
+  console.log(newHashedPass);
+  await userModel.findOneAndUpdate(
+    {
+      id: decoded.userId,
+      role: decoded.role,
+    },
+    {
+      password: newHashedPass,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  );
+
+  console.log(decoded);
+}
+
+
 export const AuthService = {
   loginUser,
   changePasswordFromBd,
   refreshToken,
   forgetPassword,
+  resetPassword
 };
