@@ -3,9 +3,9 @@ import AppError from '../../errors/AppErrors';
 import { userModel } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import config from '../../config';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload, verify } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { createToken } from './auth.utitls';
+import { createToken, verifyToken } from './auth.utitls';
 import { sendEmail } from '../../utils/seendEmail';
 
 const loginUser = async (payload: TLoginUser) => {
@@ -113,10 +113,7 @@ const changePasswordFromBd = async (
 };
 const refreshToken = async (token: string) => {
   // check if the token is valid
-  const decoded = jwt.verify(
-    token,
-    config.refresh_access_secret as string,
-  ) as JwtPayload;
+  const decoded = verifyToken(token,config.refresh_access_secret as string)
   const { userId, iat } = decoded;
 
   const user = await userModel.isUserExistByCustomId(userId);
