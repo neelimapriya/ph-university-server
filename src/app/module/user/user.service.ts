@@ -84,7 +84,7 @@ const createStudentIntoDB = async (
 };
 
 const createFacultyIntoDB = async (
-  file: any,
+  // file: any,
   password: string,
   payload: TFaculty,
 ) => {
@@ -114,10 +114,10 @@ const createFacultyIntoDB = async (
     //set  generated id
     userData.id = await generateFacultyId();
 
-    // send image to cloudinary
-    const imageName = `${userData.id}${payload?.name?.firstName}`;
-    const path = file.path;
-    const { secure_url } = await sendImageToCloudinary(imageName, path);
+    // // send image to cloudinary
+    // const imageName = `${userData.id}${payload?.name?.firstName}`;
+    // const path = file.path;
+    // const { secure_url } = await sendImageToCloudinary(imageName, path);
 
     // create a user (transaction-1)
     const newUser = await userModel.create([userData], { session }); // array
@@ -129,7 +129,7 @@ const createFacultyIntoDB = async (
     // set id , _id as user
     payload.id = newUser[0].id;
     payload.user = newUser[0]._id; //reference _id
-    payload.profileImg = secure_url;
+    // payload.profileImg = secure_url;
 
     // create a faculty (transaction-2)
 

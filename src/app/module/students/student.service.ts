@@ -29,8 +29,8 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
 
   const studentQuery = new QueryBuilder(
     StudentModelSchema.find()
-    .populate('Users')
-      .populate('AcademicSemester')
+      .populate('user')
+      .populate('admissionSemester')
       .populate({
         path: 'academicDepartment',
         populate: {
@@ -51,7 +51,7 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
 };
 const getAStudentFormDB = async (id: string) => {
   const result = await StudentModelSchema.findOne({ id })
-  
+
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -69,16 +69,16 @@ const deleteStudentFromDB = async (id: string) => {
   try {
     session.startTransaction();
     const deletedStudent = await StudentModelSchema.findByIdAndUpdate(
-       id ,
+      id,
       { isDeleted: true },
       { new: true, session },
     );
     if (!deletedStudent) {
       throw new AppError(StatusCodes.BAD_REQUEST, 'Failed to delete student');
     }
-    const userId=deletedStudent.user
+    const userId = deletedStudent.user;
     const deleteUser = await userModel.findByIdAndUpdate(
-     userId,
+      userId,
       { isDeleted: true },
       { new: true, session },
     );
