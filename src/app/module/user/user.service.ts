@@ -84,7 +84,7 @@ const createStudentIntoDB = async (
 };
 
 const createFacultyIntoDB = async (
-  // file: any,
+  file: any,
   password: string,
   payload: TFaculty,
 ) => {
@@ -94,7 +94,7 @@ const createFacultyIntoDB = async (
   //if password is not given , use default password
   userData.password = password || (config.default_pass as string);
 
-  //set student role
+  //set faculty role
   userData.role = 'faculty';
   userData.email = payload.email;
 
@@ -106,6 +106,7 @@ const createFacultyIntoDB = async (
   if (!academicDepartment) {
     throw new AppError(400, 'Academic department not found');
   }
+  payload.academicFaculty = academicDepartment?.academicFaculty;
 
   const session = await mongoose.startSession();
 
@@ -114,10 +115,14 @@ const createFacultyIntoDB = async (
     //set  generated id
     userData.id = await generateFacultyId();
 
-    // // send image to cloudinary
-    // const imageName = `${userData.id}${payload?.name?.firstName}`;
-    // const path = file.path;
-    // const { secure_url } = await sendImageToCloudinary(imageName, path);
+    if(file){
+// // send image to cloudinary
+const imageName = `${userData.id}${payload?.name?.firstName}`;
+const path = file.path;
+const { secure_url } = await sendImageToCloudinary(imageName, path);
+payload.profileImg = secure_url as string;
+    }
+    
 
     // create a user (transaction-1)
     const newUser = await userModel.create([userData], { session }); // array
@@ -129,7 +134,7 @@ const createFacultyIntoDB = async (
     // set id , _id as user
     payload.id = newUser[0].id;
     payload.user = newUser[0]._id; //reference _id
-    // payload.profileImg = secure_url;
+   
 
     // create a faculty (transaction-2)
 
