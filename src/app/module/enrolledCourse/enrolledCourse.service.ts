@@ -2,17 +2,13 @@
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../errors/AppErrors';
 import { OfferedCourse } from '../offeredCourse/offeredCourse.model';
-import {
-  TEnrolledCourse,
-  TEnrolledCourseMarks,
-} from './enrolledCourse.interface';
+import { TEnrolledCourse } from './enrolledCourse.interface';
 import EnrolledCourse from './enrolledCourse.model';
 import { StudentModelSchema } from '../students/student.model';
 import mongoose from 'mongoose';
 import { SemesterRegistration } from '../semesterRegistration/semesterRegistration.model';
 import { Course } from '../course/course.model';
 import { Faculty } from '../Faculty/faculty.model';
-import { object } from 'joi';
 import { calculateGradeAndPoints } from './enrolledCourse.utils';
 
 const createEnrolledCourse = async (
@@ -194,7 +190,7 @@ const updateEnrolledCourseMarksIntoDb = async (
       Math.ceil(finalTerm);
 
     const result = calculateGradeAndPoints(totalMarks);
-    console.log(result,totalMarks);
+    console.log(result, totalMarks);
     modifiedData.grade = result.grade;
     modifiedData.gradePoints = result.gradePoints;
     modifiedData.isCompleted = true;

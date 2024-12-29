@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // import { TStudent } from './student.interface';
 // import { StudentModel } from "./student.interface";
 import mongoose from 'mongoose';
@@ -44,10 +45,11 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
     .sort()
     .pagination()
     .fields();
+  const meta = await studentQuery.countTotal();
   const result = await studentQuery.modelQuery;
 
   // console.log(result, 'service');
-  return result;
+  return { meta, result };
 };
 const getAStudentFormDB = async (id: string) => {
   const result = await StudentModelSchema.findOne({ id })

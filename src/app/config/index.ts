@@ -13,8 +13,9 @@ export default {
   refresh_access_secret: process.env.JWT_REFRESH_SECRET,
   jwt_access_expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
   refresh_access_expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-  reset_password_ui_link:process.env.RESET_PASSWORD_UI_LINK,
-  CLOUDE_NAME:process.env.CLOUDE_NAME,
-    API_KEY:process.env.API_KEY,
-    API_SECRET:process.env.API_SECRET
+  reset_password_ui_link: process.env.RESET_PASSWORD_UI_LINK,
+  CLOUDE_NAME: process.env.CLOUDE_NAME,
+  API_KEY: process.env.API_KEY,
+  API_SECRET: process.env.API_SECRET,
+  super_admin_pass:process.env.SUPER_ADMIN_PASS
 };
