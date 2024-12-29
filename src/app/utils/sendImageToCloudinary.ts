@@ -1,7 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import config from '../config';
 import multer from 'multer';
-import fs from 'fs'
+import fs from 'fs';
 
 // Configuration
 cloudinary.config({
@@ -10,7 +10,10 @@ cloudinary.config({
   api_secret: config.API_SECRET,
 });
 
-export const sendImageToCloudinary = (imageName: string, path: string) => {
+export const sendImageToCloudinary = (
+  imageName: string,
+  path: string,
+): Promise<Record<string, unknown>> => {
   return new Promise((resolve, reject) => {
     // Upload an image
     cloudinary.uploader.upload(
@@ -23,17 +26,15 @@ export const sendImageToCloudinary = (imageName: string, path: string) => {
           reject(error);
         }
         resolve(result);
-        fs.unlink(path,(err)=>{
-          if(err){
+        fs.unlink(path, (err) => {
+          if (err) {
             console.log(err);
+          } else {
+            console.log('file deleted');
           }
-          else{
-            console.log("file deleted");
-          }
-        })
+        });
       },
     );
-    
   });
 };
 

@@ -5,8 +5,8 @@ import catchAsync from '../../utils/catchAsync';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
-  console.log(req.body);
-  console.log(req.file, 'file');
+  // console.log(req.body);
+  // console.log(req.file, 'file');
 
   // will call  service func to send this data
   const result = await UserServices.createStudentIntoDB(
