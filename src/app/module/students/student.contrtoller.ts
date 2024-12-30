@@ -6,10 +6,8 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 import { StudentModelSchema } from './student.model';
 
-
-
 // all student data
-const getAllStudents:RequestHandler = catchAsync(async (req, res) => {
+const getAllStudents: RequestHandler = catchAsync(async (req, res) => {
   const result = await StudentServices.getAllStudentsFormDB(req.query);
   sendResponse(res, {
     success: true,
@@ -22,7 +20,9 @@ const getAllStudents:RequestHandler = catchAsync(async (req, res) => {
 // single student data
 const getAStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
+
   const result = await StudentServices.getAStudentFormDB(id);
+
   sendResponse(res, {
     success: true,
     message: 'Student is retrieved  successfully',
@@ -46,8 +46,8 @@ const deleteAStudent = catchAsync(async (req, res, next) => {
 // update student
 const updateStudent = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const {student}=req.body
-  const result = await StudentServices.updateStudentIntoDB(id,student);
+  const { student } = req.body;
+  const result = await StudentServices.updateStudentIntoDB(id, student);
 
   sendResponse(res, {
     success: true,
@@ -61,5 +61,5 @@ export const studentController = {
   getAllStudents,
   getAStudent,
   deleteAStudent,
-  updateStudent
+  updateStudent,
 };

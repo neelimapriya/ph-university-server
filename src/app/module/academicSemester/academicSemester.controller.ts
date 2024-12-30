@@ -4,9 +4,8 @@ import { sendResponse } from '../../utils/sendResponse';
 import { academicSemesterServices } from './academicSemester.service';
 
 const createAcademicSemester = catchAsync(async (req, res) => {
-  // console.log(req.body);
 
-  // will call  service func to send this data
+
   const result = await academicSemesterServices.createAcademicSemesterIntoDb(
     req.body,
   );

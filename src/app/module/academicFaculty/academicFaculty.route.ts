@@ -16,8 +16,8 @@ router.post(
   ),
   AcademicFacultyController.createAcademicFaculty,
 );
-router.get('/', AcademicFacultyController.getAllAcademicFaculty);
-router.get('/:facultyId', AcademicFacultyController.getSingleAcademicFaculty);
-router.patch('/:facultyId', AcademicFacultyController.updateAcademicFaculty);
+router.get('/',auth(User_Role.superAdmin, User_Role.admin,User_Role.faculty), AcademicFacultyController.getAllAcademicFaculty);
+router.get('/:facultyId',auth(User_Role.superAdmin, User_Role.admin,User_Role.faculty), AcademicFacultyController.getSingleAcademicFaculty);
+router.patch('/:facultyId',auth(User_Role.superAdmin, User_Role.admin,User_Role.faculty), AcademicFacultyController.updateAcademicFaculty);
 
 export const AcademicFacultyRoutes = router;

@@ -95,9 +95,9 @@ const userNameSchema = new Schema<TUserName>({
   adminSchema.virtual('fullName').get(function () {
     return (
       this?.name?.firstName +
-      '' +
+      ' ' +
       this?.name?.middleName +
-      '' +
+      ' ' +
       this?.name?.lastName
     );
   });

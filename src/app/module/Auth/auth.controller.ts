@@ -26,7 +26,6 @@ const changePassword = catchAsync(async (req, res) => {
   const user = req.user;
   const { ...passwordData } = req.body;
   const result = await AuthService.changePasswordFromBd(user, passwordData);
-  console.log(req.user, req.body);
   sendResponse(res, {
     success: true,
     message: 'Password is updated successfully',
@@ -58,8 +57,8 @@ const forgetPassword = catchAsync(async (req, res) => {
   });
 });
 const resetPassword = catchAsync(async (req, res) => {
-  const token = req.headers.authorization
-  const result = await AuthService.resetPassword(req.body,token);
+  const token = req.headers.authorization 
+  const result = await AuthService.resetPassword(req.body,token as string);
 
   sendResponse(res, {
     success: true,

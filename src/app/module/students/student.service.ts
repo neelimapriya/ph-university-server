@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// import { TStudent } from './student.interface';
-// import { StudentModel } from "./student.interface";
+
 import mongoose from 'mongoose';
 import { StudentModelSchema } from './student.model';
 import AppError from '../../errors/AppErrors';
@@ -10,23 +9,11 @@ import { TStudent } from './student.interface';
 import QueryBuilder from '../../builder/QueryBuilder';
 
 // const createStudentIntoDB = async (Students: TStudent) => {
-//   if (await StudentModelSchema.isUserExists(Students.id)) {
-//     throw new Error('User already exists!');
-//   }
-
-//   const result = await StudentModelSchema.create(Students); //built in static method
-
-//   // static method
-//   // const Student=new StudentModelSchema(Students)
-//   // if(await Student.isUserExists(Students.id)){
-//   //     throw new Error("User already exist")
-//   // }
-//   //   const result = await Student.save(); //built in instance method
-//   return result;
+// see user.service.ts
 // };
 
 const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
-  const studentSearchableFields = ['email', 'name.firstName', 'presentAddress'];
+  const studentSearchableFields = ['email', 'name.firstName','name.lastName', 'presentAddress'];
 
   const studentQuery = new QueryBuilder(
     StudentModelSchema.find()
@@ -48,7 +35,6 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
   const meta = await studentQuery.countTotal();
   const result = await studentQuery.modelQuery;
 
-  // console.log(result, 'service');
   return { meta, result };
 };
 const getAStudentFormDB = async (id: string) => {
@@ -61,6 +47,7 @@ const getAStudentFormDB = async (id: string) => {
         path: 'academicFaculty',
       },
     });
+
   // alternative
   // const result = await StudentModelSchema.aggregate([{$match:{id:id}}]);
   return result;
@@ -118,7 +105,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
       modifiedUpdatedData[`localGuardian.${key}`] = value;
     }
   }
-  // console.log(modifiedUpdatedData);
+ 
   const result = await StudentModelSchema.findOneAndUpdate(
     { id },
     modifiedUpdatedData,

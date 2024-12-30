@@ -3,7 +3,7 @@ import AppError from '../../errors/AppErrors';
 import { userModel } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
 import config from '../../config';
-import jwt, { JwtPayload, verify } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { createToken, verifyToken } from './auth.utitls';
 import { sendEmail } from '../../utils/seendEmail';
@@ -11,7 +11,6 @@ import { sendEmail } from '../../utils/seendEmail';
 const loginUser = async (payload: TLoginUser) => {
   // checking if the user is exist
   const user = await userModel.isUserExistByCustomId(payload.id);
-  console.log(user);
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found!');
   }
@@ -66,7 +65,6 @@ const changePasswordFromBd = async (
   payload: { oldPassword: string; newPassword: string },
 ) => {
   const user = await userModel.isUserExistByCustomId(userData.userId);
-  console.log(user);
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found!');
   }
@@ -84,7 +82,7 @@ const changePasswordFromBd = async (
     throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
   }
   //checking if the password is correct
-  console.log(payload?.oldPassword, user?.password);
+  // console.log(payload?.oldPassword, user?.password);
   if (
     !(await userModel.isPasswordMatched(payload?.oldPassword, user?.password))
   ) {
@@ -97,7 +95,7 @@ const changePasswordFromBd = async (
     Number(config.bcrypt_salt_round),
   );
 
-  console.log(newHashedPass);
+  // console.log(newHashedPass);
   await userModel.findOneAndUpdate(
     {
       id: userData.userId,
@@ -113,7 +111,7 @@ const changePasswordFromBd = async (
 };
 const refreshToken = async (token: string) => {
   // check if the token is valid
-  const decoded = verifyToken(token,config.refresh_access_secret as string)
+  const decoded = verifyToken(token, config.refresh_access_secret as string);
   const { userId, iat } = decoded;
 
   const user = await userModel.isUserExistByCustomId(userId);
@@ -134,7 +132,7 @@ const refreshToken = async (token: string) => {
   if (userStatus === 'blocked') {
     throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
   }
-  console.log(user);
+  // console.log(user);
   if (
     user.passwordChangedAt &&
     userModel.isJWTIssuedBeforePasswordChanged(
@@ -180,7 +178,6 @@ const forgetPassword = async (userId: string) => {
     throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
   }
 
-
   //create token and sent to the  client
   const jwtPayload = {
     userId: user.id,
@@ -189,15 +186,16 @@ const forgetPassword = async (userId: string) => {
   const resetToken = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    '10m'
+    '10m',
   );
 
-  const resetLink=`${config.reset_password_ui_link}?id=${user.id}&token=${resetToken}`
-  sendEmail(user.email,resetLink)
-console.log(resetLink);
+  const resetLink = `${config.reset_password_ui_link}?id=${user.id}&token=${resetToken}`;
+  sendEmail(user.email, resetLink);
 };
-const resetPassword=async(payload:{id:string,newPassword:string},token)=>{
-
+const resetPassword = async (
+  payload: { id: string; newPassword: string },
+  token: string,
+) => {
   const user = await userModel.isUserExistByCustomId(payload?.id);
   // console.log(user);
   if (!user) {
@@ -217,12 +215,13 @@ const resetPassword=async(payload:{id:string,newPassword:string},token)=>{
     throw new AppError(StatusCodes.FORBIDDEN, 'This user is blocked ! !');
   }
 
-  const decoded=jwt.verify(token,
+  const decoded = jwt.verify(
+    token,
     config.jwt_access_secret as string,
-  )as JwtPayload
+  ) as JwtPayload;
 
-  if(payload?.id !==decoded.userId){
-throw new AppError(StatusCodes.FORBIDDEN,'You are forbidden!')
+  if (payload?.id !== decoded.userId) {
+    throw new AppError(StatusCodes.FORBIDDEN, 'You are forbidden!');
   }
 
   // hash new pass
@@ -231,7 +230,6 @@ throw new AppError(StatusCodes.FORBIDDEN,'You are forbidden!')
     Number(config.bcrypt_salt_round),
   );
 
-  console.log(newHashedPass);
   await userModel.findOneAndUpdate(
     {
       id: decoded.userId,
@@ -243,15 +241,12 @@ throw new AppError(StatusCodes.FORBIDDEN,'You are forbidden!')
       passwordChangedAt: new Date(),
     },
   );
-
-  console.log(decoded);
-}
-
+};
 
 export const AuthService = {
   loginUser,
   changePasswordFromBd,
   refreshToken,
   forgetPassword,
-  resetPassword
+  resetPassword,
 };
