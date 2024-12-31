@@ -8,8 +8,22 @@ import { AcademicDepartmentModel } from '../academicDepartment/academicDepartmen
 import { Course } from '../course/course.model';
 import { Faculty } from '../Faculty/faculty.model';
 import { hasTimeConflict } from './offeredCourse.utils';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { StudentModelSchema } from '../students/student.model';
 
 const createOfferedCourseIntoDb = async (payload: TOfferedCourse) => {
+  /**
+   * Step 1: check if the semester registration id is exists!
+   * Step 2: check if the academic faculty id is exists!
+   * Step 3: check if the academic department id is exists!
+   * Step 4: check if the course id is exists!
+   * Step 5: check if the faculty id is exists!
+   * Step 6: check if the department is belong to the  faculty
+   * Step 7: check if the same offered course same section in same registered semester exists
+   * Step 8: get the schedules of the faculties
+   * Step 9: check if the faculty is available at that time. If not then throw error
+   * Step 10: create the offered course
+   */
   const {
     semesterRegistration,
     academicFaculty,
@@ -176,7 +190,133 @@ const updateOfferedCourseIntoDB = async (
   return result;
 };
 
+const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
+  const offeredCourseQuery = new QueryBuilder(OfferedCourse.find(), query)
+    .filter()
+    .sort()
+    .pagination()
+    .fields();
+
+  const result = await offeredCourseQuery.modelQuery;
+  const meta = await offeredCourseQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
+const getSingleOfferedCourseFromDB = async (id: string) => {
+  const offeredCourse = await OfferedCourse.findById(id);
+
+  if (!offeredCourse) {
+    throw new AppError(404, 'Offered Course not found');
+  }
+
+  return offeredCourse;
+};
+
+// module-21-10
+const getMyOfferedCoursesFromDB = async (userId: string) => {
+  // find the student
+  const student = await StudentModelSchema.findOne({ id: userId });
+  if (!student) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Student is not found!');
+  }
+
+  // current ongoing semester
+  const currentOngoingRegistrationSemester = await SemesterRegistration.findOne(
+    { status: 'ONGOING' },
+  );
+  if (!currentOngoingRegistrationSemester) {
+    throw new AppError(
+      StatusCodes.NOT_FOUND,
+      'There is no ongoing semester registration !',
+    );
+  }
+  const result = await OfferedCourse.aggregate([
+    {
+      $match: {
+        semesterRegistration: currentOngoingRegistrationSemester._id,
+        academicFaculty: student.academicFaculty,
+        academicDepartment: student.academicDepartment,
+      },
+    },
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course',
+        foreignField: '_id',
+        as: 'course',
+      },
+    },
+    // array break korar jonno unwind
+    {
+      $unwind: '$course',
+    },
+    {
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          currentOngoingRegistrationSemester:
+            currentOngoingRegistrationSemester._id,
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  // variable theke access korle 2ta $$ dite hoy
+                  {
+                    $eq: [
+                      '$semesterRegistration',
+                      '$$currentOngoingRegistrationSemester',
+                    ],
+                  },
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isEnrolled', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'enrolledCourses',
+      },
+    },
+    {
+      $addFields: {
+        isAlreadyEnrolled: {
+          $in: [
+            '$course._id',
+            {
+              $map: {
+                input: '$enrolledCourses',
+                as: 'enroll', //ekhane as mane map er variable
+                in: '$$enroll.course',
+              },
+            },
+          ],
+        },
+      },
+    },
+    {
+      $match:{
+        isAlreadyEnrolled:false
+      }
+    }
+  ]);
+
+  return result;
+};
+
 export const offeredCourseService = {
   createOfferedCourseIntoDb,
   updateOfferedCourseIntoDB,
+  getAllOfferedCoursesFromDB,
+  getSingleOfferedCourseFromDB,
+  getMyOfferedCoursesFromDB,
 };

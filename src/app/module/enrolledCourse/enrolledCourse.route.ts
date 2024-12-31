@@ -3,12 +3,13 @@ import auth from '../../middleware/auth';
 import validateRequest from '../../middleware/validateRequest';
 import { EnrolledCourseValidations } from './enrolledCourse.validation';
 import { EnrolledCourseController } from './enrolledCourse.controller';
+import { User_Role } from '../user/user.constant';
 
 const router = Router();
 
 router.post(
   '/',
-  auth('student'),
+  auth(User_Role.student),
   validateRequest(
     EnrolledCourseValidations.createEnrolledCourseValidationZodSchema,
   ),
@@ -16,7 +17,7 @@ router.post(
 );
 router.patch(
   '/update-marks',
-  auth('faculty'),
+  auth(User_Role.faculty,User_Role.admin),
   validateRequest(
     EnrolledCourseValidations.updateEnrolledCourseMarksValidationZodSchema,
   ),
