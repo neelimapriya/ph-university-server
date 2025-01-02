@@ -216,7 +216,15 @@ const getSingleOfferedCourseFromDB = async (id: string) => {
 };
 
 // module-21-10
-const getMyOfferedCoursesFromDB = async (userId: string) => {
+const getMyOfferedCoursesFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  //pagination setup
+
+  const page = Number(query?.page) || 1;
+  const limit = Number(query?.limit) || 10;
+  const skip = (page - 1) * limit;
   // find the student
   const student = await StudentModelSchema.findOne({ id: userId });
   if (!student) {
@@ -233,7 +241,8 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
       'There is no ongoing semester registration !',
     );
   }
-  const result = await OfferedCourse.aggregate([
+
+  const aggregateQuery = [
     {
       $match: {
         semesterRegistration: currentOngoingRegistrationSemester._id,
@@ -288,14 +297,64 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
       },
     },
     {
+      $lookup: {
+        from: 'enrolledcourses',
+        let: {
+          currentStudent: student._id,
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $eq: ['$student', '$$currentStudent'],
+                  },
+                  {
+                    $eq: ['$isCompleted', true],
+                  },
+                ],
+              },
+            },
+          },
+        ],
+        as: 'completedCourses',
+      },
+    },
+    {
       $addFields: {
+        completedCourseIds: {
+          $map: {
+            input: '$completedCourses',
+            as: 'completed',
+            in: '$$completed.course',
+          },
+        },
+      },
+    },
+
+    {
+      $addFields: {
+        isPreRequisitesFulFilled: {
+          $or: [
+            {
+              $eq: ['$course.preRequisiteCourses', []],
+            },
+            {
+              $setIsSubset: [
+                '$course.preRequisiteCourses.course',
+                '$completedCourseIds',
+              ],
+            },
+          ],
+        },
         isAlreadyEnrolled: {
           $in: [
             '$course._id',
             {
               $map: {
                 input: '$enrolledCourses',
-                as: 'enroll', //ekhane as mane map er variable
+                as: 'enroll', 
                 in: '$$enroll.course',
               },
             },
@@ -304,13 +363,39 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
       },
     },
     {
-      $match:{
-        isAlreadyEnrolled:false
-      }
-    }
+      $match: {
+        isAlreadyEnrolled: false,
+        isPreRequisitesFulFilled: true,
+      },
+    },
+  ];
+  const paginationQuery = [
+    {
+      $skip: skip,
+    },
+    {
+      $limit: limit,
+    },
+  ];
+
+  const result = await OfferedCourse.aggregate([
+    ...aggregateQuery,
+    ...paginationQuery,
   ]);
 
-  return result;
+  const total = (await OfferedCourse.aggregate(aggregateQuery)).length;
+
+  const totalPage = Math.ceil(result.length / limit);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage,
+    },
+    result,
+  };
 };
 
 export const offeredCourseService = {

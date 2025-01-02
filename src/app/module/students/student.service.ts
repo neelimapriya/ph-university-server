@@ -13,18 +13,18 @@ import QueryBuilder from '../../builder/QueryBuilder';
 // };
 
 const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
-  const studentSearchableFields = ['email', 'name.firstName','name.lastName', 'presentAddress'];
+  const studentSearchableFields = [
+    'email',
+    'name.firstName',
+    'name.lastName',
+    'presentAddress',
+  ];
 
   const studentQuery = new QueryBuilder(
     StudentModelSchema.find()
       .populate('user')
-      .populate('admissionSemester')
-      .populate({
-        path: 'academicDepartment',
-        populate: {
-          path: 'academicFaculty',
-        },
-      }),
+      .populate('admissionSemester academicDepartment academicFaculty')
+     ,
     query,
   )
     .search(studentSearchableFields)
@@ -40,13 +40,7 @@ const getAllStudentsFormDB = async (query: Record<string, unknown>) => {
 const getAStudentFormDB = async (id: string) => {
   const result = await StudentModelSchema.findOne({ id })
 
-    .populate('admissionSemester')
-    .populate({
-      path: 'academicDepartment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    });
+    .populate('admissionSemester academicDepartment academicFaculty');
 
   // alternative
   // const result = await StudentModelSchema.aggregate([{$match:{id:id}}]);
@@ -105,7 +99,7 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
       modifiedUpdatedData[`localGuardian.${key}`] = value;
     }
   }
- 
+
   const result = await StudentModelSchema.findOneAndUpdate(
     { id },
     modifiedUpdatedData,

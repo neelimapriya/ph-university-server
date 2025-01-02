@@ -14,7 +14,7 @@ const createCourseIntoDB = async (payload: TCourse) => {
 };
 const getAllCourseFromDB = async (query: Record<string, unknown>) => {
   const courseQuery = new QueryBuilder(
-    Course.find().populate('PreRequisiteCourses.course'),
+    Course.find().populate('preRequisiteCourses.course'),
     query,
   )
     .search(courseSearchableFIeld)
@@ -27,8 +27,13 @@ const getAllCourseFromDB = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 const getSingleCourseFromDB = async (id: string) => {
+
+  const course=await Course.findById(id)
+  if(!course){
+    throw new AppError(StatusCodes.NOT_FOUND,'Course not found!')
+  }
   const result = await Course.findById(id).populate(
-    'PreRequisiteCourses.course',
+    'preRequisiteCourses.course',
   );
   return result;
 };

@@ -17,7 +17,8 @@ const getAllCourses = catchAsync(async (req, res) => {
   sendResponse(res, {
     success: true,
     message: 'Courses are retrieve successfully',
-    data: result,
+    meta: result.meta,
+    data: result.result,
     statusCode: StatusCodes.OK,
   });
 });
@@ -44,7 +45,7 @@ const deleteCourse = catchAsync(async (req, res) => {
 });
 const updateCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await CourseService.updateCourseFromDB(id,req.body);
+  const result = await CourseService.updateCourseFromDB(id, req.body);
   sendResponse(res, {
     success: true,
     message: 'course is updated successfully',
@@ -53,13 +54,13 @@ const updateCourse = catchAsync(async (req, res) => {
   });
 });
 
-
-
-
 const assignFacultiesWithCourse = catchAsync(async (req, res) => {
   const { courseId } = req.params;
   const { faculties } = req.body;
-  const result = await CourseService.assignFacultiesWithCourseIntoDB(courseId,faculties);
+  const result = await CourseService.assignFacultiesWithCourseIntoDB(
+    courseId,
+    faculties,
+  );
   sendResponse(res, {
     success: true,
     message: 'Faculty is assign successfully',
@@ -69,7 +70,7 @@ const assignFacultiesWithCourse = catchAsync(async (req, res) => {
 });
 const getFacultiesWithCourse = catchAsync(async (req, res) => {
   const { courseId } = req.params;
-  const result = await CourseService.getFacultiesWithCourseFromDB(courseId,);
+  const result = await CourseService.getFacultiesWithCourseFromDB(courseId);
   sendResponse(res, {
     success: true,
     message: 'Faculty with course is retrieve successfully',
@@ -78,22 +79,20 @@ const getFacultiesWithCourse = catchAsync(async (req, res) => {
   });
 });
 
-const removeFacultiesFromCourse=catchAsync(async(req,res)=>{
+const removeFacultiesFromCourse = catchAsync(async (req, res) => {
   const { courseId } = req.params;
   const { faculties } = req.body;
-  const result=await CourseService.removeFacultiesFromCourseFromDB(
+  const result = await CourseService.removeFacultiesFromCourseFromDB(
     courseId,
     faculties,
-  )
-  sendResponse(res,{
+  );
+  sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Faculties removed  successfully',
     data: result,
-  })
-})
-
-
+  });
+});
 
 export const CourseController = {
   createCourse,
@@ -103,5 +102,5 @@ export const CourseController = {
   updateCourse,
   assignFacultiesWithCourse,
   removeFacultiesFromCourse,
-  getFacultiesWithCourse
+  getFacultiesWithCourse,
 };
